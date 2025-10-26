@@ -1,3 +1,3 @@
 url_origin,method_origin,params_origin,headers_origin,url_new,method_new,params_new,headers_new
-http://127.0.0.1:8000/marvel/heroes,get,name=jorge&apellido=ll,capitulo=jdjd,http://127.0.0.1:8000/marvel/heroes/1,get,name=jorge&apellido=ll,capitulo=jdjd
-http://127.0.0.1:8000/marvel/heroes,get,name=jorge&apellido,capitulo=jdjd,http://127.0.0.1:8000/marvel/heroes,get,name=jorge&apellido=ll,capitulo=jdjd
+http://127.0.0.1:8000/marvel/heroes/2,get,name=jorge&apellido=ll,capitulo=jdjd,http://127.0.0.1:8000/marvel/heroes/1,get,name=jorge&apellido=ll,capitulo=jdjd
+http://127.0.0.1:8000/marvel/heroes/1,get,name=jorge&apellido=ll,capitulo=jdjd,http://127.0.0.1:8000/marvel/heroes/1,get,name=jorge&apellido=ll,capitulo=jdjd
