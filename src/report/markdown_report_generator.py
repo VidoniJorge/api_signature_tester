@@ -23,17 +23,8 @@ class MarkdownReportGenerator:
             f"✅ **Exitosas:** {passed}",
             f"❌ **Con diferencias:** {failed}",
             "\n---\n",
-            "## 📋 Índice de Comparaciones",
         ]
-        print(type(md))
-        # Crear índice con enlaces
-        for idx, test in enumerate(test_results, 1):
-            comp = test.get_comparation_result()
-            icon = "✅" if comp.is_equal() else "❌"
-            md.append(f"- [{icon} Comparación #{idx}](#comparacion-{idx})")
-
-        md.append("\n---")
-
+        
         # Crear cada bloque colapsable
         for idx, test in enumerate(test_results, 1):
             comp = test.get_comparation_result()

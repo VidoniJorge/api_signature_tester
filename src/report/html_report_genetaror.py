@@ -131,7 +131,7 @@ class HTMLReportGenerator:
     <body>
     """]
 
-        html.append(f"<h1>Reporte de Comparaciones putdo</h1>")
+        html.append(f"<h1>Reporte de Comparaciones</h1>")
         html.append(f"<p class='info'>Fecha de ejecución: {now}</p>")
         html.append(f"<p class='info'>Total de casos: {total} | ✅ {passed} exitosos | ❌ {failed} con diferencias</p>")
 
