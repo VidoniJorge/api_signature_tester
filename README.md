@@ -6,6 +6,25 @@ app to compare the response of two versions of the same endpoint
 uv run src/main.py
 ```
 
+## tools
+Listado de tools que se utilizan en el proyecto
+
+### ruff
+
+Herramienta que nos ayuda a mantener el formato de nuestros archivos
+
+[docu oficial](https://docs.astral.sh/ruff/)
+
 ```bash
 ruff format ./src
+```
+
+### mypy
+
+Herramienta que nos ayuda a validar el typing de nustros archivos.
+
+[docu oficial](https://mypy.readthedocs.io/en/stable/config_file.html)
+
+```bash
+mypy ./src
 ```

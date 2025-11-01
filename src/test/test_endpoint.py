@@ -1,7 +1,7 @@
 import requests
 import json
 from deepdiff import DeepDiff
-
+from typing import Tuple, Dict, List, Any
 
 class EndpointData:
     def __init__(
@@ -14,7 +14,7 @@ class EndpointData:
 
 
 class ComparationResult:
-    def __init__(self, are_equal: bool, diff_status_code: dict, diff_body: list):
+    def __init__(self, are_equal: bool, diff_status_code: Dict[str, Any], diff_body: List[Dict[str, Any]] ):
         self._are_equal = are_equal
         self._diff_status_code = diff_status_code
         self._diff_body = diff_body
@@ -22,13 +22,18 @@ class ComparationResult:
     def is_equal(self) -> bool:
         return self._are_equal
 
-    def get_diffs(self) -> dict:
+    def get_diffs(self) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
+        """Devuelve una tupla (diff_status_code, diff_body).
+
+        - diff_status_code: dict con cambios en código de estado
+        - diff_body: lista de dicts con cambios en el body
+        """
         return self._diff_status_code, self._diff_body
 
-    def get_diff_status_code(self) -> dict:
+    def get_diff_status_code(self) -> Dict[str, Any]:
         return self._diff_status_code
 
-    def get_diff_body(self) -> list:
+    def get_diff_body(self) -> List[Dict[str, Any]]:
         return self._diff_body
 
 
@@ -93,11 +98,33 @@ def _compare_responses(r1, r2) -> ComparationResult:
             "new_value": r2.status_code,
         }
 
+    # Intentamos parsear ambas respuestas a JSON; si fallan, las marcamos como None
+    j1 = None
+    j2 = None
     try:
-        j1, j2 = r1.json(), r2.json()
+        j1 = r1.json()
     except json.JSONDecodeError:
-        diffs.append("Una de las respuestas no es JSON.")
-        return diffs
+        j1 = None
+
+    try:
+        j2 = r2.json()
+    except json.JSONDecodeError:
+        j2 = None
+
+    # Si alguna respuesta no es JSON, registramos el error y devolvemos un ComparationResult
+    if j1 is None or j2 is None:
+        respoinse_comparation_equals = False
+        diffs["internal-error"] = {
+            "message": "Una de las respuestas no es JSON.",
+            "source_is_json": j1 is not None,
+            "new_is_json": j2 is not None,
+        }
+        return ComparationResult(
+            respoinse_comparation_equals,
+            diffs.get("status_code", {}),
+            [],
+        )
+
 
     deep_diff_body = DeepDiff(j1, j2, ignore_order=True)
     # print(type(diff_body))
@@ -128,12 +155,11 @@ def _compare_responses(r1, r2) -> ComparationResult:
 
     if len(diffs_body) > 0:
         respoinse_comparation_equals = False
-        diffs["body"] = diffs_body
 
     return ComparationResult(
         respoinse_comparation_equals,
         diffs.get("status_code", {}),
-        diffs.get("body", []),
+        diffs_body,
     )
 
 
