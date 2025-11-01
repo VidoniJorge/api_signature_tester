@@ -2,8 +2,12 @@ from datetime import datetime
 from typing import List
 
 """Generador de reportes en formato Markdown."""
+
+
 class MarkdownReportGenerator:
-    def generate(self, test_results: List, output_file: str = "reports/report.md") -> None:
+    def generate(
+        self, test_results: List, output_file: str = "reports/report.md"
+    ) -> None:
         """
         Genera un reporte en formato Markdown con resultados colapsables.
         Args:
@@ -24,7 +28,7 @@ class MarkdownReportGenerator:
             f"❌ **Con diferencias:** {failed}",
             "\n---\n",
         ]
-        
+
         # Crear cada bloque colapsable
         for idx, test in enumerate(test_results, 1):
             comp = test.get_comparation_result()
@@ -36,7 +40,9 @@ class MarkdownReportGenerator:
             color_class = "success" if is_equal else "fail"
 
             md.append(f"<details id='comparacion-{idx}' class='{color_class}'>")
-            md.append(f"<summary><strong>🧩 Comparación #{idx} {icon}</strong></summary>\n")
+            md.append(
+                f"<summary><strong>🧩 Comparación #{idx} {icon}</strong></summary>\n"
+            )
 
             md.append(f"**Source URL:** `{source.url}`  ")
             md.append(f"**New URL:** `{new.url}`  ")
@@ -65,4 +71,4 @@ class MarkdownReportGenerator:
             md.append("</details>\n")
 
         with open(output_file, "w", encoding="utf-8") as f:
-                f.write("\n".join(md))
+            f.write("\n".join(md))

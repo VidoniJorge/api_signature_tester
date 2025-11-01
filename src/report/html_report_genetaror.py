@@ -2,8 +2,12 @@ from datetime import datetime
 from typing import List
 
 """Generador de reportes en formato HTML."""
+
+
 class HTMLReportGenerator:
-    def generate(self, test_results: List, output_file: str = "reports/report.html") -> None:
+    def generate(
+        self, test_results: List, output_file: str = "reports/report.html"
+    ) -> None:
         """
         Genera un reporte en formato HTML con resultados colapsables y filtrables.
         Args:
@@ -19,7 +23,8 @@ class HTMLReportGenerator:
         passed = sum(1 for tr in test_results if tr.get_comparation_result().is_equal())
         failed = total - passed
 
-        html = ["""
+        html = [
+            """
     <!DOCTYPE html>
     <html lang="es">
     <head>
@@ -129,11 +134,14 @@ class HTMLReportGenerator:
     </style>
     </head>
     <body>
-    """]
+    """
+        ]
 
         html.append(f"<h1>Reporte de Comparaciones</h1>")
         html.append(f"<p class='info'>Fecha de ejecución: {now}</p>")
-        html.append(f"<p class='info'>Total de casos: {total} | ✅ {passed} exitosos | ❌ {failed} con diferencias</p>")
+        html.append(
+            f"<p class='info'>Total de casos: {total} | ✅ {passed} exitosos | ❌ {failed} con diferencias</p>"
+        )
 
         # Barra de filtro
         html.append("""
@@ -156,7 +164,9 @@ class HTMLReportGenerator:
             status_class = "success" if are_equal else "fail"
             symbol = "✅" if are_equal else "❌"
 
-            html.append(f"<details class='case {status_class}' id='caso{i}'><summary>{symbol} Caso {i}</summary>")
+            html.append(
+                f"<details class='case {status_class}' id='caso{i}'><summary>{symbol} Caso {i}</summary>"
+            )
             html.append("<div>")
             html.append(f"<p><strong>Source URL:</strong> {source.url}</p>")
             html.append(f"<p><strong>New URL:</strong> {new.url}</p>")
@@ -167,21 +177,29 @@ class HTMLReportGenerator:
                 html.append("<p><strong>Diferencias en Status Code:</strong></p>")
                 html.append(f"<pre>{diff_status}</pre>")
             else:
-                html.append("<p><strong>Diferencias en Status Code:</strong> Sin diferencias</p>")
+                html.append(
+                    "<p><strong>Diferencias en Status Code:</strong> Sin diferencias</p>"
+                )
 
             # Body
             if diff_body:
                 html.append("<p><strong>Diferencias en Body:</strong></p>")
-                html.append("<table><tr><th>Tipo</th><th>Ruta</th><th>Valor Anterior</th><th>Valor Nuevo</th></tr>")
+                html.append(
+                    "<table><tr><th>Tipo</th><th>Ruta</th><th>Valor Anterior</th><th>Valor Nuevo</th></tr>"
+                )
                 for diff in diff_body:
                     tipo = diff.get("Tipo", "")
                     path = diff.get("Ruta", "")
                     old = diff.get("Valor anterior", "")
                     newv = diff.get("Valor nuevo", "")
-                    html.append(f"<tr><td>{tipo}</td><td>{path}</td><td>{old}</td><td>{newv}</td></tr>")
+                    html.append(
+                        f"<tr><td>{tipo}</td><td>{path}</td><td>{old}</td><td>{newv}</td></tr>"
+                    )
                 html.append("</table>")
             else:
-                html.append("<p><strong>Diferencias en Body:</strong> Sin diferencias</p>")
+                html.append(
+                    "<p><strong>Diferencias en Body:</strong> Sin diferencias</p>"
+                )
 
             html.append("</div></details>")
 
