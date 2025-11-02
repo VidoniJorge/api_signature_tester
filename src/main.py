@@ -1,8 +1,8 @@
-from etl.etl_source_data import LoaderData, ETLDataProcess
 from etl.etl_csv import LoaderCsv
-from test.test_endpoint import test_endpoint
-from report.markdown_report_generator import MarkdownReportGenerator
+from etl.etl_source_data import ETLDataProcess, LoaderData
 from report.html_report_genetaror import HTMLReportGenerator
+from report.markdown_report_generator import MarkdownReportGenerator
+from test.test_endpoint import test_endpoint
 
 
 def load_test_cases(etl: LoaderData) -> ETLDataProcess:

@@ -1,7 +1,9 @@
-import requests
 import json
+from typing import Any
+
+import requests
 from deepdiff import DeepDiff
-from typing import Tuple, Dict, List, Any
+
 
 class EndpointData:
     def __init__(
@@ -14,7 +16,8 @@ class EndpointData:
 
 
 class ComparationResult:
-    def __init__(self, are_equal: bool, diff_status_code: Dict[str, Any], diff_body: List[Dict[str, Any]] ):
+    def __init__(self, are_equal: bool, diff_status_code: dict[str, Any], 
+                 diff_body: list[dict[str, Any]] ):
         self._are_equal = are_equal
         self._diff_status_code = diff_status_code
         self._diff_body = diff_body
@@ -22,7 +25,7 @@ class ComparationResult:
     def is_equal(self) -> bool:
         return self._are_equal
 
-    def get_diffs(self) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
+    def get_diffs(self) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         """Devuelve una tupla (diff_status_code, diff_body).
 
         - diff_status_code: dict con cambios en código de estado
@@ -30,10 +33,10 @@ class ComparationResult:
         """
         return self._diff_status_code, self._diff_body
 
-    def get_diff_status_code(self) -> Dict[str, Any]:
+    def get_diff_status_code(self) -> dict[str, Any]:
         return self._diff_status_code
 
-    def get_diff_body(self) -> List[Dict[str, Any]]:
+    def get_diff_body(self) -> list[dict[str, Any]]:
         return self._diff_body
 
 
@@ -111,7 +114,8 @@ def _compare_responses(r1, r2) -> ComparationResult:
     except json.JSONDecodeError:
         j2 = None
 
-    # Si alguna respuesta no es JSON, registramos el error y devolvemos un ComparationResult
+    # Si alguna respuesta no es JSON, registramos el error y devolvemos 
+    # un ComparationResult
     if j1 is None or j2 is None:
         respoinse_comparation_equals = False
         diffs["internal-error"] = {

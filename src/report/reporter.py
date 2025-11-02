@@ -1,5 +1,4 @@
 from typing import Protocol
-from typing import List
 
 """
 Interfaz para generadores de reportes.
@@ -7,7 +6,7 @@ Interfaz para generadores de reportes.
 
 
 class ReportGenerator(Protocol):
-    def generate(self, test_results: List, output_file: str) -> None:
+    def generate(self, test_results: list, output_file: str) -> None:
         """
         Args:
             test_results (List): Lista de resultados de las pruebas.

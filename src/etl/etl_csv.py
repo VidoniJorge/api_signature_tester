@@ -9,7 +9,7 @@ class LoaderCsv:
 
     def load_data(self) -> ETLDataProcess:
         etlData = ETLDataProcess()
-        with open(self.file_path, mode="r") as file:
+        with open(self.file_path) as file:
             csv_reader = csv.reader(file)
             for index, row in enumerate(csv_reader):
                 if index == 0:

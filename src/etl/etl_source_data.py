@@ -1,4 +1,5 @@
 from typing import Protocol
+
 from test.test_endpoint import EndpointData
 
 

@@ -1,12 +1,11 @@
 from datetime import datetime
-from typing import List
 
 """Generador de reportes en formato HTML."""
 
 
 class HTMLReportGenerator:
     def generate(
-        self, test_results: List, output_file: str = "reports/report.html"
+        self, test_results: list, output_file: str = "reports/report.html"
     ) -> None:
         """
         Genera un reporte en formato HTML con resultados colapsables y filtrables.
@@ -16,7 +15,6 @@ class HTMLReportGenerator:
         Returns:
             None
         """
-        from datetime import datetime
 
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         total = len(test_results)
@@ -137,10 +135,11 @@ class HTMLReportGenerator:
     """
         ]
 
-        html.append(f"<h1>Reporte de Comparaciones</h1>")
+        html.append("<h1>Reporte de Comparaciones</h1>")
         html.append(f"<p class='info'>Fecha de ejecución: {now}</p>")
         html.append(
-            f"<p class='info'>Total de casos: {total} | ✅ {passed} exitosos | ❌ {failed} con diferencias</p>"
+            f"<p class='info'>Total de casos: {total} | ✅ {passed} exitosos " + 
+            f"| ❌ {failed} con diferencias</p>"
         )
 
         # Barra de filtro
@@ -165,7 +164,8 @@ class HTMLReportGenerator:
             symbol = "✅" if are_equal else "❌"
 
             html.append(
-                f"<details class='case {status_class}' id='caso{i}'><summary>{symbol} Caso {i}</summary>"
+                f"<details class='case {status_class}' id='caso{i}'>" +
+                f"<summary>{symbol} Caso {i}</summary>"
             )
             html.append("<div>")
             html.append(f"<p><strong>Source URL:</strong> {source.url}</p>")
@@ -178,14 +178,16 @@ class HTMLReportGenerator:
                 html.append(f"<pre>{diff_status}</pre>")
             else:
                 html.append(
-                    "<p><strong>Diferencias en Status Code:</strong> Sin diferencias</p>"
+                    "<p><strong>Diferencias en Status Code:" +
+                    "</strong> Sin diferencias</p>"
                 )
 
             # Body
             if diff_body:
                 html.append("<p><strong>Diferencias en Body:</strong></p>")
                 html.append(
-                    "<table><tr><th>Tipo</th><th>Ruta</th><th>Valor Anterior</th><th>Valor Nuevo</th></tr>"
+                    "<table><tr><th>Tipo</th><th>Ruta</th>"+
+                    "<th>Valor Anterior</th><th>Valor Nuevo</th></tr>"
                 )
                 for diff in diff_body:
                     tipo = diff.get("Tipo", "")

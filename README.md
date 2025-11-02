@@ -19,6 +19,14 @@ Herramienta que nos ayuda a mantener el formato de nuestros archivos
 ruff format ./src
 ```
 
+```bash
+ruff check
+```
+
+```bash
+ruff check --fix
+```
+
 ### mypy
 
 Herramienta que nos ayuda a validar el typing de nustros archivos.

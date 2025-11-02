@@ -1,12 +1,11 @@
 from datetime import datetime
-from typing import List
 
 """Generador de reportes en formato Markdown."""
 
 
 class MarkdownReportGenerator:
     def generate(
-        self, test_results: List, output_file: str = "reports/report.md"
+        self, test_results: list, output_file: str = "reports/report.md"
     ) -> None:
         """
         Genera un reporte en formato Markdown con resultados colapsables.
