@@ -12,6 +12,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "mypy>=1.18.2",
+    "pre-commit>=4.3.0",
     "ruff>=0.14.3",
     "types-requests>=2.32.4.20250913",
 ]
@@ -28,6 +29,8 @@ select = [
     "B",
     # flake8-simplify
     "SIM",
+    # lake8-bandit
+    "S",
     # isort
     "I",
 ]

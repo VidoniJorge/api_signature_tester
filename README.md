@@ -36,3 +36,7 @@ Herramienta que nos ayuda a validar el typing de nustros archivos.
 ```bash
 mypy ./src
 ```
+
+### pre-commit
+
+[docu oficial](https://pre-commit.com/)
