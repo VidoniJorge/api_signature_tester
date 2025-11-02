@@ -39,4 +39,6 @@ mypy ./src
 
 ### pre-commit
 
+Herramienta que nos ayuda a realizar validaciones de código de forma automática antes de que el commit quede efectivo, evitando de esta forma subir errores evitables a nuestra ramas.
+
 [docu oficial](https://pre-commit.com/)
