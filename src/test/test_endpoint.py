@@ -9,15 +9,31 @@ class EndpointData:
     def __init__(
         self, url: str, method: str, params: dict[str, str], headers: dict[str, str]
     ):
-        self.url = url
-        self.method = method
-        self.params = params
-        self.headers = headers
+        self._url = url
+        self._method = method
+        self._params = params
+        self._headers = headers
+
+    def get_url(self) -> str:
+        return self._url
+
+    def get_method(self) -> str:
+        return self._method
+
+    def get_params(self) -> dict[str, str]:
+        return self._params
+
+    def get_headers(self) -> dict[str, str]:
+        return self._headers
 
 
 class ComparationResult:
-    def __init__(self, are_equal: bool, diff_status_code: dict[str, Any], 
-                 diff_body: list[dict[str, Any]] ):
+    def __init__(
+        self,
+        are_equal: bool,
+        diff_status_code: dict[str, Any],
+        diff_body: list[dict[str, Any]],
+    ):
         self._are_equal = are_equal
         self._diff_status_code = diff_status_code
         self._diff_body = diff_body
@@ -77,11 +93,11 @@ def test_endpoint(source: EndpointData, new: EndpointData) -> TestResult:
     :param new: EndpointData object containing URL, method, params, headers
     """
 
-    response_source = get_rest_function(source.method)(
-        url=source.url, params=source.params, headers=source.headers
+    response_source = get_rest_function(source.get_method())(
+        url=source.get_url(), params=source.get_params(), headers=source.get_headers()
     )
-    response_new = get_rest_function(new.method)(
-        url=new.url, params=new.params, headers=new.headers
+    response_new = get_rest_function(new.get_method())(
+        url=new.get_url(), params=new.get_params(), headers=new.get_headers()
     )
 
     comparation_result = _compare_responses(response_source, response_new)
@@ -114,7 +130,7 @@ def _compare_responses(r1, r2) -> ComparationResult:
     except json.JSONDecodeError:
         j2 = None
 
-    # Si alguna respuesta no es JSON, registramos el error y devolvemos 
+    # Si alguna respuesta no es JSON, registramos el error y devolvemos
     # un ComparationResult
     if j1 is None or j2 is None:
         respoinse_comparation_equals = False
@@ -128,7 +144,6 @@ def _compare_responses(r1, r2) -> ComparationResult:
             diffs.get("status_code", {}),
             [],
         )
-
 
     deep_diff_body = DeepDiff(j1, j2, ignore_order=True)
     # print(type(diff_body))

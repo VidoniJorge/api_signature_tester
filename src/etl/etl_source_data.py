@@ -5,8 +5,14 @@ from test.test_endpoint import EndpointData
 
 class TestData:
     def __init__(self, source: EndpointData, new: EndpointData):
-        self.source = source
-        self.new = new
+        self._source = source
+        self._new = new
+
+    def get_source(self) -> EndpointData:
+        return self._source
+
+    def get_new(self) -> EndpointData:
+        return self._new
 
 
 class ETLDataProcess:

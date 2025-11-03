@@ -43,9 +43,9 @@ class MarkdownReportGenerator:
                 f"<summary><strong>🧩 Comparación #{idx} {icon}</strong></summary>\n"
             )
 
-            md.append(f"**Source URL:** `{source.url}`  ")
-            md.append(f"**New URL:** `{new.url}`  ")
-            md.append(f"**Método:** `{source.method}`  ")
+            md.append(f"**Source URL:** `{source.get_url()}`  ")
+            md.append(f"**New URL:** `{new.get_url()}`  ")
+            md.append(f"**Método:** `{source.get_method()}`  ")
 
             diff_status = comp.get_diff_status_code()
             if diff_status:

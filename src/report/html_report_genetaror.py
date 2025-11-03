@@ -138,8 +138,8 @@ class HTMLReportGenerator:
         html.append("<h1>Reporte de Comparaciones</h1>")
         html.append(f"<p class='info'>Fecha de ejecución: {now}</p>")
         html.append(
-            f"<p class='info'>Total de casos: {total} | ✅ {passed} exitosos " + 
-            f"| ❌ {failed} con diferencias</p>"
+            f"<p class='info'>Total de casos: {total} | ✅ {passed} exitosos "
+            + f"| ❌ {failed} con diferencias</p>"
         )
 
         # Barra de filtro
@@ -164,13 +164,13 @@ class HTMLReportGenerator:
             symbol = "✅" if are_equal else "❌"
 
             html.append(
-                f"<details class='case {status_class}' id='caso{i}'>" +
-                f"<summary>{symbol} Caso {i}</summary>"
+                f"<details class='case {status_class}' id='caso{i}'>"
+                + f"<summary>{symbol} Caso {i}</summary>"
             )
             html.append("<div>")
-            html.append(f"<p><strong>Source URL:</strong> {source.url}</p>")
-            html.append(f"<p><strong>New URL:</strong> {new.url}</p>")
-            html.append(f"<p><strong>Método:</strong> {source.method}</p>")
+            html.append(f"<p><strong>Source URL:</strong> {source.get_url()}</p>")
+            html.append(f"<p><strong>New URL:</strong> {new.get_url()}</p>")
+            html.append(f"<p><strong>Método:</strong> {source.get_method()}</p>")
 
             # Status Code
             if diff_status:
@@ -178,16 +178,16 @@ class HTMLReportGenerator:
                 html.append(f"<pre>{diff_status}</pre>")
             else:
                 html.append(
-                    "<p><strong>Diferencias en Status Code:" +
-                    "</strong> Sin diferencias</p>"
+                    "<p><strong>Diferencias en Status Code:"
+                    + "</strong> Sin diferencias</p>"
                 )
 
             # Body
             if diff_body:
                 html.append("<p><strong>Diferencias en Body:</strong></p>")
                 html.append(
-                    "<table><tr><th>Tipo</th><th>Ruta</th>"+
-                    "<th>Valor Anterior</th><th>Valor Nuevo</th></tr>"
+                    "<table><tr><th>Tipo</th><th>Ruta</th>"
+                    + "<th>Valor Anterior</th><th>Valor Nuevo</th></tr>"
                 )
                 for diff in diff_body:
                     tipo = diff.get("Tipo", "")

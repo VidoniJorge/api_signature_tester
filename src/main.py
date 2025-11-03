@@ -13,7 +13,7 @@ def main():
     test_cases = load_test_cases(LoaderCsv("src/request.csv"))
     results_tests = []
     for test_case in test_cases.get_rest_data():
-        results_tests.append(test_endpoint(test_case.source, test_case.new))
+        results_tests.append(test_endpoint(test_case.get_source(), test_case.get_new()))
 
     reportGenerator = MarkdownReportGenerator()
     reportGenerator.generate(results_tests, "reports/comparisons_report.md")

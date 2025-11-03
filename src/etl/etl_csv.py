@@ -1,6 +1,7 @@
 import csv
 
-from etl.etl_source_data import EndpointData, ETLDataProcess, TestData
+from etl.etl_source_data import ETLDataProcess, TestData
+from test.test_endpoint import EndpointData
 
 
 class LoaderCsv:

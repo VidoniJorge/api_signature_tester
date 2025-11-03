@@ -42,3 +42,20 @@ mypy ./src
 Herramienta que nos ayuda a realizar validaciones de código de forma automática antes de que el commit quede efectivo, evitando de esta forma subir errores evitables a nuestra ramas.
 
 [docu oficial](https://pre-commit.com/)
+
+### pytest
+Pytest es el estándar moderno en Python para pruebas unitarias.
+
+[docu official](https://docs.pytest.org/en/stable/)
+
+```bash
+pytest
+```
+
+```bash
+ pytest --cov=src --cov-report=html
+ ```
+
+ ```bash
+ pytest -n auto --cov=src --cov-report=html -v
+ ```
