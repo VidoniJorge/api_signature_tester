@@ -1,7 +1,7 @@
 import pytest
 
-from etl.etl_csv import LoaderCsv
-from etl.etl_source_data import ETLDataProcess
+from api_signature_tester.etl.etl_csv import LoaderCsv
+from api_signature_tester.etl.etl_source_data import ETLDataProcess
 
 
 @pytest.fixture

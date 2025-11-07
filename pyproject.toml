@@ -17,6 +17,7 @@ dev = [
     "pytest-cov>=7.0.0",
     "pytest-xdist>=3.8.0",
     "ruff>=0.14.3",
+    "snakeviz>=2.2.2",
     "types-requests>=2.32.4.20250913",
 ]
 

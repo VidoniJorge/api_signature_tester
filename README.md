@@ -1,6 +1,9 @@
 # api_signature_tester
 app to compare the response of two versions of the same endpoint
 
+```bash
+export PYTHONPATH=$PYTHONPATH:$(pwd)/src
+```
 
 ```bash
 uv run src/main.py
@@ -59,3 +62,32 @@ pytest
  ```bash
  pytest -n auto --cov=src --cov-report=html -v
  ```
+
+### snakeviz
+
+Herramienta que nos ayuda a leer de forma más sencilla los profiles
+
+[docu official](https://jiffyclub.github.io/snakeviz/)
+
+**instalar**
+```bash
+uv add --dev snakeviz
+```
+
+
+**correr profile**
+```bash
+python -m cProfile -m main
+```
+
+o
+
+```bash
+python -m cProfile -o api_signature_tester.prof -m main
+```
+
+
+**leer profile con snakeviz**
+```bash
+snakeviz api_signature_tester.prof
+```
