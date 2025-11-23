@@ -3,6 +3,7 @@ from typing import Any
 
 import requests
 from deepdiff import DeepDiff
+from deepdiff.helper import SetOrdered
 
 
 class EndpointData:
@@ -93,29 +94,46 @@ def test_endpoint(source: EndpointData, new: EndpointData) -> TestResult:
     :param new: EndpointData object containing URL, method, params, headers
     """
 
-    response_source = get_rest_function(source.get_method())(
-        url=source.get_url(), params=source.get_params(), headers=source.get_headers()
-    )
-    response_new = get_rest_function(new.get_method())(
-        url=new.get_url(), params=new.get_params(), headers=new.get_headers()
-    )
+    response_source, response_new = _exetute_requests(source, new)
 
     comparation_result = _compare_responses(response_source, response_new)
 
     return TestResult(source, new, comparation_result)
 
 
+def test_compare_patial_response(
+    source: EndpointData, new: EndpointData, compare_element
+) -> TestResult:
+    """
+    Test the given endpoint function by making a request to the specified URL
+    :param source: EndpointData object containing URL, method, params, headers
+    :param new: EndpointData object containing URL, method, params, headers
+    """
+
+    response_source, response_new = _exetute_requests(source, new)
+
+    comparation_result = _compare_responses(response_source, response_new)
+
+    return TestResult(source, new, comparation_result)
+
+
+def _exetute_requests(source: EndpointData, new: EndpointData):
+    response_source = get_rest_function(source.get_method())(
+        url=source.get_url(), params=source.get_params(), headers=source.get_headers()
+    )
+    response_new = get_rest_function(new.get_method())(
+        url=new.get_url(), params=new.get_params(), headers=new.get_headers()
+    )
+    return response_source, response_new
+
+
 def _compare_responses(r1, r2) -> ComparationResult:
     respoinse_comparation_equals = True
 
-    diffs = {}
-
-    if r1.status_code != r2.status_code:
-        respoinse_comparation_equals = False
-        diffs["status_code"] = {
-            "old_value": r1.status_code,
-            "new_value": r2.status_code,
-        }
+    diffs: dict[str, Any] = {}
+    # Añadimos los diffs del código de estado si existen
+    status_diff = _find_http_status_code(r1, r2) or {}
+    diffs.update(status_diff)
 
     # Intentamos parsear ambas respuestas a JSON; si fallan, las marcamos como None
     j1 = None
@@ -134,15 +152,22 @@ def _compare_responses(r1, r2) -> ComparationResult:
     # un ComparationResult
     if j1 is None or j2 is None:
         respoinse_comparation_equals = False
-        diffs["internal-error"] = {
-            "message": "Una de las respuestas no es JSON.",
-            "source_is_json": j1 is not None,
-            "new_is_json": j2 is not None,
-        }
+        # diffs["internal-error"] = {
+        #    "message": "Una de las respuestas no es JSON.",
+        #    "source_is_json": j1 is not None,
+        #    "new_is_json": j2 is not None,
+        # }
         return ComparationResult(
             respoinse_comparation_equals,
             diffs.get("status_code", {}),
-            [],
+            [
+                _create_body_diff(
+                    "format_error",
+                    ".",
+                    f"source_is_json {j1 is not None}",
+                    f"new_is_json {j2 is not None}",
+                )
+            ],
         )
 
     deep_diff_body = DeepDiff(j1, j2, ignore_order=True)
@@ -166,11 +191,23 @@ def _compare_responses(r1, r2) -> ComparationResult:
         diffs_body.append(_create_body_diff("Elemento eliminado", path, value, ""))
 
     # Nuevas claves añadidas
-    for path, value in deep_diff_body.get("dictionary_item_added", []):
-        diffs_body.append(_create_body_diff("Clave añadida", path, "", value))
+    added = deep_diff_body.get("dictionary_item_added", {})
+    if isinstance(added, (set, list, tuple, SetOrdered)):
+        # elementos como "root['newkey']" (sin valor). usamos "" como value por defecto.
+        iterator = ((path, "") for path in added)
+        for path, value in iterator:
+            diffs_body.append(_create_body_diff("Clave añadida", path, "", value))
+
     # Claves eliminadas
-    for path, value in deep_diff_body.get("dictionary_item_removed", []):
-        diffs_body.append(_create_body_diff("Clave eliminada", path, value, ""))
+    removed = deep_diff_body.get("dictionary_item_removed", {})
+    if isinstance(removed, (set, list, tuple, SetOrdered)):
+        # elementos como "root['newkey']" (sin valor). usamos "" como value por defecto.
+        iterator = ((path, "") for path in removed)
+        for path, value in iterator:
+            diffs_body.append(_create_body_diff("Clave eliminada", path, "", value))
+
+    # for path, value in deep_diff_body.get("dictionary_item_removed", []):
+    # diffs_body.append(_create_body_diff("Clave eliminada", path, value, ""))
 
     if len(diffs_body) > 0:
         respoinse_comparation_equals = False
@@ -180,6 +217,22 @@ def _compare_responses(r1, r2) -> ComparationResult:
         diffs.get("status_code", {}),
         diffs_body,
     )
+
+
+def _find_http_status_code(r1, r2):
+    """
+    Devuelve un dict con la diferencia del status code o un dict
+    vacío si no hay cambios.
+    """
+    if r1.status_code != r2.status_code:
+        return {
+            "status_code": {
+                "old_value": r1.status_code,
+                "new_value": r2.status_code,
+            }
+        }
+
+    return {}
 
 
 def _create_body_diff(type: str, path: str, old_value: str, new_value: str) -> dict:

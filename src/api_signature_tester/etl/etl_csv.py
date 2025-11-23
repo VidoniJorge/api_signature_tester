@@ -1,7 +1,7 @@
 import csv
 
 from api_signature_tester.etl.etl_source_data import ETLDataProcess, TestData
-from api_signature_tester.test.test_endpoint import EndpointData
+from api_signature_tester.validator.test_endpoint import EndpointData
 
 
 class LoaderCsv:

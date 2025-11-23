@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from api_signature_tester.test.test_endpoint import EndpointData
+from api_signature_tester.validator.test_endpoint import EndpointData
 
 
 class TestData:
