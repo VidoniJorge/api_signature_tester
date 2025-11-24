@@ -2,11 +2,11 @@ import json
 
 import pytest
 
-from api_signature_tester.validator.test_endpoint import (
+from api_signature_tester.validator.pipeline_json_api import (
     ComparationResult,
-    _compare_responses,
-    _create_body_diff,
+    PipelineFullJsonApiValidator,
     _find_http_status_code,
+    create_body_diff,
 )
 
 
@@ -42,7 +42,7 @@ def test_find_http_status_code_change():
 
 
 def test_create_body_diff_structure():
-    diff = _create_body_diff("Cambio", "root['a']", "1", "2")
+    diff = create_body_diff("Cambio", "root['a']", "1", "2")
     assert isinstance(diff, dict)
     assert set(diff.keys()) == {"Tipo", "Ruta", "Valor anterior", "Valor nuevo"}
     assert diff["Tipo"] == "Cambio"
@@ -68,7 +68,8 @@ def test_compare_responses_non_json(
     r1 = FakeResponse(200, json_data=source_response)
     r2 = FakeResponse(200, json_data=target_response)
 
-    result = _compare_responses(r1, r2)
+    pipelline = PipelineFullJsonApiValidator()
+    result = pipelline.execute(r1, r2)
     assert isinstance(result, ComparationResult)
     assert result.is_equal() is False
     # When one response is not JSON, diff status_code should be empty (if status same)
@@ -85,8 +86,8 @@ def test_compare_responses_non_json(
 def test_compare_responses_body_diff_values_change():
     r1 = FakeResponse(200, json_data={"a": 1, "b": [1, 2]})
     r2 = FakeResponse(200, json_data={"a": 2, "b": [1, 2]})
-
-    result = _compare_responses(r1, r2)
+    pipelline = PipelineFullJsonApiValidator()
+    result = pipelline.execute(r1, r2)
     assert isinstance(result, ComparationResult)
     assert result.is_equal() is False
     status_diff, body_diff = result.get_diffs()
@@ -102,8 +103,8 @@ def test_compare_responses_body_diff_values_change():
 def test_compare_responses_body_diff_iterable_item_add():
     r1 = FakeResponse(200, json_data={"a": 1, "b": [1, 2]})
     r2 = FakeResponse(200, json_data={"a": 1, "b": [1, 2, 10]})
-
-    result = _compare_responses(r1, r2)
+    pipelline = PipelineFullJsonApiValidator()
+    result = pipelline.execute(r1, r2)
     assert isinstance(result, ComparationResult)
     assert result.is_equal() is False
     status_diff, body_diff = result.get_diffs()
@@ -120,7 +121,8 @@ def test_compare_responses_body_diff_iterable_item_removed():
     r1 = FakeResponse(200, json_data={"a": 1, "b": [1, 2, 3]})
     r2 = FakeResponse(200, json_data={"a": 1, "b": [1, 2]})
 
-    result = _compare_responses(r1, r2)
+    pipelline = PipelineFullJsonApiValidator()
+    result = pipelline.execute(r1, r2)
     assert isinstance(result, ComparationResult)
     assert result.is_equal() is False
     status_diff, body_diff = result.get_diffs()
@@ -137,7 +139,8 @@ def test_compare_responses_body_diff_dictionary_item_add():
     r1 = FakeResponse(200, json_data={"a": 1, "b": [1, 2]})
     r2 = FakeResponse(200, json_data={"a": 1, "b": [1, 2], "c": [1, 2], "d": {"x": 10}})
 
-    result = _compare_responses(r1, r2)
+    pipelline = PipelineFullJsonApiValidator()
+    result = pipelline.execute(r1, r2)
     assert isinstance(result, ComparationResult)
     assert result.is_equal() is False
     status_diff, body_diff = result.get_diffs()
@@ -154,7 +157,8 @@ def test_compare_responses_body_diff_dictionary_item_removed():
     r1 = FakeResponse(200, json_data={"a": 1, "b": [1, 2], "c": 3})
     r2 = FakeResponse(200, json_data={"a": 1, "b": [1, 2]})
 
-    result = _compare_responses(r1, r2)
+    pipelline = PipelineFullJsonApiValidator()
+    result = pipelline.execute(r1, r2)
     assert isinstance(result, ComparationResult)
     assert result.is_equal() is False
     status_diff, body_diff = result.get_diffs()
@@ -172,7 +176,8 @@ def test_compare_responses_status_code_and_body():
     r1 = FakeResponse(200, json_data={"a": 1})
     r2 = FakeResponse(500, json_data={"a": 2})
 
-    result = _compare_responses(r1, r2)
+    pipelline = PipelineFullJsonApiValidator()
+    result = pipelline.execute(r1, r2)
     assert isinstance(result, ComparationResult)
     assert result.is_equal() is False
     status_diff, body_diff = result.get_diffs()
