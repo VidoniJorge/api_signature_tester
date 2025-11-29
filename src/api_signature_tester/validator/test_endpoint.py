@@ -49,15 +49,6 @@ class TestResult:
         return self._comparation_result
 
 
-def get_rest_function(method: str):
-    return {
-        "get": requests.get,
-        "post": requests.post,
-        "head": requests.head,
-        "options": requests.options,
-    }.get(method.lower())
-
-
 def test_endpoint(source: EndpointData, new: EndpointData) -> TestResult:
     """
     Test the given endpoint function by making a request to the specified URL
@@ -76,10 +67,24 @@ def test_endpoint(source: EndpointData, new: EndpointData) -> TestResult:
 def _exetute_requests(
     source: EndpointData, new: EndpointData
 ) -> tuple[requests.Response, requests.Response]:
-    response_source = get_rest_function(source.get_method())(
+    response_source = _get_rest_function(source.get_method())(
         url=source.get_url(), params=source.get_params(), headers=source.get_headers()
     )
-    response_new = get_rest_function(new.get_method())(
+    response_new = _get_rest_function(new.get_method())(
         url=new.get_url(), params=new.get_params(), headers=new.get_headers()
     )
     return response_source, response_new
+
+
+def _get_rest_function(method: str):
+    result = {
+        "get": requests.get,
+        "post": requests.post,
+        "head": requests.head,
+        "options": requests.options,
+    }.get(method.lower())
+
+    if result is None:
+        raise TypeError(f"Unknown HTTP method for new: {method}")
+
+    return result
