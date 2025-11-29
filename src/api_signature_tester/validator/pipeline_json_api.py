@@ -2,38 +2,12 @@ import json
 from abc import ABC, abstractmethod
 from typing import Any
 
+import jmespath
 from deepdiff import DeepDiff
 from deepdiff.helper import SetOrdered
 from requests.models import Response
 
-
-class ComparationResult:
-    def __init__(
-        self,
-        are_equal: bool,
-        diff_status_code: dict[str, Any],
-        diff_body: list[dict[str, Any]],
-    ):
-        self._are_equal = are_equal
-        self._diff_status_code = diff_status_code
-        self._diff_body = diff_body
-
-    def is_equal(self) -> bool:
-        return self._are_equal
-
-    def get_diffs(self) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-        """Devuelve una tupla (diff_status_code, diff_body).
-
-        - diff_status_code: dict con cambios en código de estado
-        - diff_body: lista de dicts con cambios en el body
-        """
-        return self._diff_status_code, self._diff_body
-
-    def get_diff_status_code(self) -> dict[str, Any]:
-        return self._diff_status_code
-
-    def get_diff_body(self) -> list[dict[str, Any]]:
-        return self._diff_body
+from api_signature_tester.validator.validator_model import ComparationResult
 
 
 class PipelineJsonApiValidartor(ABC):
@@ -41,7 +15,7 @@ class PipelineJsonApiValidartor(ABC):
         compare_status_code_result = self.compare_status_code(r1, r2)
 
         body_all_diffs = []
-        j1, j2 = self.get_json_response(r1, r2)
+        j1, j2 = self.get_body_response(r1, r2)
         compare_format_result = self.compare_format_body(j1, j2)
         body_all_diffs.extend(compare_format_result)
 
@@ -75,20 +49,9 @@ class PipelineJsonApiValidartor(ABC):
 
         return {}
 
-    def get_json_response(self, r1: Response, r2: Response) -> tuple[Any, Any]:
-        j1 = None
-        j2 = None
-        try:
-            j1 = r1.json()
-        except json.JSONDecodeError:
-            j1 = None
-
-        try:
-            j2 = r2.json()
-        except json.JSONDecodeError:
-            j2 = None
-
-        return j1, j2
+    @abstractmethod
+    def get_body_response(self, r1: Response, r2: Response) -> tuple[Any, Any]:
+        raise NotImplementedError
 
     def compare_format_body(self, j1, j2) -> list[dict[str, Any]]:
         # Si alguna respuesta no es JSON, registramos el error y devolvemos
@@ -112,6 +75,21 @@ class PipelineJsonApiValidartor(ABC):
 class PipelineFullJsonApiValidator(PipelineJsonApiValidartor):
     def __init__(self):
         pass
+
+    def get_body_response(self, r1: Response, r2: Response) -> tuple[Any, Any]:
+        j1 = None
+        j2 = None
+        try:
+            j1 = r1.json()
+        except json.JSONDecodeError:
+            j1 = None
+
+        try:
+            j2 = r2.json()
+        except json.JSONDecodeError:
+            j2 = None
+
+        return j1, j2
 
     def compare_body(self, j1, j2) -> list[dict[str, Any]]:
         deep_diff_body = DeepDiff(j1, j2, ignore_order=True)
@@ -154,20 +132,17 @@ class PipelineFullJsonApiValidator(PipelineJsonApiValidartor):
         return diffs_body
 
 
-def _find_http_status_code(r1, r2):
-    """
-    Devuelve un dict con la diferencia del status code o un dict
-    vacío si no hay cambios.
-    """
-    if r1.status_code != r2.status_code:
-        return {
-            "status_code": {
-                "old_value": r1.status_code,
-                "new_value": r2.status_code,
-            }
-        }
+class PipelineJsonApiParcialValidator(PipelineFullJsonApiValidator):
+    def __init__(self, path_to_validate: str):
+        self._path_to_validate = path_to_validate
 
-    return {}
+    def get_body_response(self, r1, r2):
+        j1, j2 = super().get_body_response(r1, r2)
+        if j1 is not None:
+            j1 = jmespath.search(self._path_to_validate, j1)
+        if j2 is not None:
+            j2 = jmespath.search(self._path_to_validate, j2)
+        return j1, j2
 
 
 def create_body_diff(type: str, path: str, old_value: str, new_value: str) -> dict:

@@ -9,6 +9,13 @@ export PYTHONPATH=$PYTHONPATH:$(pwd)/src
 uv run src/main.py
 ```
 
+## dependencies
+
+### jmespath
+
+[jmespath]( https://jmespath.org/ )
+
+
 ## tools
 Listado de tools que se utilizan en el proyecto
 

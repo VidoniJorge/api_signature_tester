@@ -1,9 +1,9 @@
 import requests
 
 from api_signature_tester.validator.pipeline_json_api import (
-    ComparationResult,
     PipelineFullJsonApiValidator,
 )
+from api_signature_tester.validator.validator_model import ComparationResult
 
 
 class EndpointData:
@@ -73,7 +73,9 @@ def test_endpoint(source: EndpointData, new: EndpointData) -> TestResult:
     return TestResult(source, new, comparation_result)
 
 
-def _exetute_requests(source: EndpointData, new: EndpointData):
+def _exetute_requests(
+    source: EndpointData, new: EndpointData
+) -> tuple[requests.Response, requests.Response]:
     response_source = get_rest_function(source.get_method())(
         url=source.get_url(), params=source.get_params(), headers=source.get_headers()
     )

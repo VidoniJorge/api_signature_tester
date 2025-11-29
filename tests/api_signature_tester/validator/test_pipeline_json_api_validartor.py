@@ -3,11 +3,10 @@ import json
 import pytest
 
 from api_signature_tester.validator.pipeline_json_api import (
-    ComparationResult,
     PipelineFullJsonApiValidator,
-    _find_http_status_code,
     create_body_diff,
 )
+from api_signature_tester.validator.validator_model import ComparationResult
 
 
 class FakeResponse:
@@ -27,7 +26,8 @@ def test_find_http_status_code_no_change():
     r1 = FakeResponse(200, json_data={})
     r2 = FakeResponse(200, json_data={})
 
-    result = _find_http_status_code(r1, r2)
+    pipeline = PipelineFullJsonApiValidator()
+    result = pipeline.compare_status_code(r1, r2)
     assert result == {}
 
 
@@ -35,7 +35,8 @@ def test_find_http_status_code_change():
     r1 = FakeResponse(200, json_data={})
     r2 = FakeResponse(404, json_data={})
 
-    result = _find_http_status_code(r1, r2)
+    pipeline = PipelineFullJsonApiValidator()
+    result = pipeline.compare_status_code(r1, r2)
     assert "status_code" in result
     assert result["status_code"]["old_value"] == 200
     assert result["status_code"]["new_value"] == 404
