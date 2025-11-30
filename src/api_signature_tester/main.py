@@ -4,7 +4,7 @@ from api_signature_tester.report.html_report_genetaror import HTMLReportGenerato
 from api_signature_tester.report.markdown_report_generator import (
     MarkdownReportGenerator,
 )
-from api_signature_tester.test.test_endpoint import test_endpoint
+from api_signature_tester.validator.test_endpoint import test_endpoint
 
 
 def load_test_cases(etl: LoaderData) -> ETLDataProcess:

@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "deepdiff>=8.6.1",
+    "jmespath>=1.0.1",
     "requests>=2.32.5",
 ]
 
@@ -56,6 +57,10 @@ pythonpaths = [
 
 [tool.mypy]
 mypy_path = ["src"]
+
+[[tool.mypy.overrides]]
+module = "jmespath.*"
+ignore_missing_imports = true
 
 [build-system]
 requires = ["hatchling"]
