@@ -28,6 +28,24 @@ class EndpointData:
         return self._headers
 
 
+class TestEndpointModel:
+    def __init__(
+        self, source: EndpointData, new: EndpointData, test_path_json: str | None = None
+    ):
+        self._source = source
+        self._new = new
+        self._test_path_json = test_path_json
+
+    def get_source(self) -> EndpointData:
+        return self._source
+
+    def get_new(self) -> EndpointData:
+        return self._new
+
+    def get_test_path_json(self) -> str | None:
+        return self._test_path_json
+
+
 class TestResult:
     def __init__(
         self,

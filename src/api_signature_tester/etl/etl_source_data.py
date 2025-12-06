@@ -33,5 +33,5 @@ class ETLDataProcess:
         return self._load_errors
 
 
-class LoaderData(Protocol):
-    def load_data(self) -> ETLDataProcess: ...
+class ETLProccess(Protocol):
+    def load_data(self, file_path: str) -> ETLDataProcess: ...

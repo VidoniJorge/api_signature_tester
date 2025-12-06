@@ -1,16 +1,17 @@
 import csv
 
-from api_signature_tester.etl.etl_source_data import ETLDataProcess, TestData
+from api_signature_tester.etl.etl_source_data import (
+    ETLDataProcess,
+    ETLProccess,
+    TestData,
+)
 from api_signature_tester.validator.test_endpoint import EndpointData
 
 
-class LoaderCsv:
-    def __init__(self, file_path: str):
-        self.file_path = file_path
-
-    def load_data(self) -> ETLDataProcess:
+class LoaderCsv(ETLProccess):
+    def load_data(self, file_path: str) -> ETLDataProcess:
         etlData = ETLDataProcess()
-        with open(self.file_path) as file:
+        with open(file_path) as file:
             csv_reader = csv.reader(file)
             for index, row in enumerate(csv_reader):
                 if index == 0:

@@ -1,0 +1,8 @@
+{
+    "log_level": "ERROR",
+    "csv_path": "src/api_signature_tester/request.csv",
+    "report_md_path": "reports/comparisons_report.md",
+    "report_html_path": "reports/comparisons_report.html",
+    "environment": "dev"
+
+}
