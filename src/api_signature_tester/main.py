@@ -8,7 +8,11 @@ from api_signature_tester.report.html_report_genetaror import HTMLReportGenerato
 from api_signature_tester.report.markdown_report_generator import (
     MarkdownReportGenerator,
 )
-from api_signature_tester.validator.test_endpoint import test_endpoint
+from api_signature_tester.validator.pipeline_api_validaror import PipelineApiValidaror
+from api_signature_tester.validator.pipeline_json_api import (
+    PipelineFullJsonApiValidator,
+)
+from api_signature_tester.validator.validator_model import TestEndpointModel, TestResult
 
 
 class ColorFormatter(logging.Formatter):
@@ -47,6 +51,10 @@ class ApiSignatureTester(ABC):
 
 
 class ApiSignatureTesterSynch(ApiSignatureTester):
+    def __init__(self, pipeline: PipelineApiValidaror):
+        super().__init__()
+        self._pipeline = pipeline
+
     def run(self, **kwargs):
         """
         Main function to run the API signature tester.
@@ -116,8 +124,8 @@ class ApiSignatureTesterSynchBase(ApiSignatureTesterSynch):
         etl: ETLProccess = LoaderCsv()
         return etl.load_data(csv_path)
 
-    def execute_test_case(self, test_case):
-        return test_endpoint(test_case.get_source(), test_case.get_new())
+    def execute_test_case(self, test_case: TestEndpointModel) -> TestResult:
+        return self._pipeline.execute(test_case.get_source(), test_case.get_new())
 
     def generate_report(self, results_tests, **kwargs):
         """
@@ -158,7 +166,7 @@ class ApiSignatureTesterSynchBase(ApiSignatureTesterSynch):
 
 
 def run(**kwargs):
-    ApiSignatureTesterSynchBase().run(**kwargs)
+    ApiSignatureTesterSynchBase(PipelineFullJsonApiValidator()).run(**kwargs)
 
 
 global settings

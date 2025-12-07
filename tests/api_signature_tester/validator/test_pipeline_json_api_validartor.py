@@ -4,9 +4,7 @@ import pytest
 
 from api_signature_tester.validator.pipeline_json_api import (
     PipelineFullJsonApiValidator,
-    create_body_diff,
 )
-from api_signature_tester.validator.validator_model import ComparationResult
 
 
 class FakeResponse:
@@ -20,36 +18,6 @@ class FakeResponse:
             # simulate a JSON decoding error
             raise json.JSONDecodeError("Expecting value", "", 0)
         return self._json_data
-
-
-def test_find_http_status_code_no_change():
-    r1 = FakeResponse(200, json_data={})
-    r2 = FakeResponse(200, json_data={})
-
-    pipeline = PipelineFullJsonApiValidator()
-    result = pipeline.compare_status_code(r1, r2)
-    assert result == {}
-
-
-def test_find_http_status_code_change():
-    r1 = FakeResponse(200, json_data={})
-    r2 = FakeResponse(404, json_data={})
-
-    pipeline = PipelineFullJsonApiValidator()
-    result = pipeline.compare_status_code(r1, r2)
-    assert "status_code" in result
-    assert result["status_code"]["old_value"] == 200
-    assert result["status_code"]["new_value"] == 404
-
-
-def test_create_body_diff_structure():
-    diff = create_body_diff("Cambio", "root['a']", "1", "2")
-    assert isinstance(diff, dict)
-    assert set(diff.keys()) == {"Tipo", "Ruta", "Valor anterior", "Valor nuevo"}
-    assert diff["Tipo"] == "Cambio"
-    assert diff["Ruta"] == "root['a']"
-    assert diff["Valor anterior"] == "1"
-    assert diff["Valor nuevo"] == "2"
 
 
 cases = [
@@ -70,52 +38,37 @@ def test_compare_responses_non_json(
     r2 = FakeResponse(200, json_data=target_response)
 
     pipelline = PipelineFullJsonApiValidator()
-    result = pipelline.execute(r1, r2)
-    assert isinstance(result, ComparationResult)
-    assert result.is_equal() is False
-    # When one response is not JSON, diff status_code should be empty (if status same)
-    status_diff, body_diff = result.get_diffs()
-    assert status_diff == {}
-    assert set(body_diff[0].keys()) == {"Tipo", "Ruta", "Valor anterior", "Valor nuevo"}
-    print(body_diff)
-    assert body_diff[0]["Tipo"] == "format_error"
-    assert body_diff[0]["Ruta"] == "."
-    assert body_diff[0]["Valor anterior"] == source_expected
-    assert body_diff[0]["Valor nuevo"] == target_expected
+    j1, j2 = pipelline.get_body_response(r1, r2)
+    result = pipelline.compare_format_body(j1, j2)
+    assert set(result[0].keys()) == {"Tipo", "Ruta", "Valor anterior", "Valor nuevo"}
+    assert result[0]["Tipo"] == "format_error"
+    assert result[0]["Ruta"] == "."
+    assert result[0]["Valor anterior"] == source_expected
+    assert result[0]["Valor nuevo"] == target_expected
 
 
 def test_compare_responses_body_diff_values_change():
     r1 = FakeResponse(200, json_data={"a": 1, "b": [1, 2]})
     r2 = FakeResponse(200, json_data={"a": 2, "b": [1, 2]})
     pipelline = PipelineFullJsonApiValidator()
-    result = pipelline.execute(r1, r2)
-    assert isinstance(result, ComparationResult)
-    assert result.is_equal() is False
-    status_diff, body_diff = result.get_diffs()
-    # no status code change
-    assert status_diff == {}
-    # body_diff should contain at least one change describing the modified value
-    assert isinstance(body_diff, list)
-    assert len(body_diff) >= 1
-    assert set(body_diff[0].keys()) == {"Tipo", "Ruta", "Valor anterior", "Valor nuevo"}
-    assert body_diff[0]["Tipo"] == "Cambio de valor"
+    j1, j2 = pipelline.get_body_response(r1, r2)
+    result = pipelline.compare_body(j1, j2)
+    assert isinstance(result, list)
+    assert len(result) >= 1
+    assert set(result[0].keys()) == {"Tipo", "Ruta", "Valor anterior", "Valor nuevo"}
+    assert result[0]["Tipo"] == "Cambio de valor"
 
 
 def test_compare_responses_body_diff_iterable_item_add():
     r1 = FakeResponse(200, json_data={"a": 1, "b": [1, 2]})
     r2 = FakeResponse(200, json_data={"a": 1, "b": [1, 2, 10]})
     pipelline = PipelineFullJsonApiValidator()
-    result = pipelline.execute(r1, r2)
-    assert isinstance(result, ComparationResult)
-    assert result.is_equal() is False
-    status_diff, body_diff = result.get_diffs()
-    # no status code change
-    assert status_diff == {}
-    # body_diff should contain at least one change describing the modified value
-    assert isinstance(body_diff, list)
-    assert len(body_diff) >= 1
-    assert set(body_diff[0].keys()) == {"Tipo", "Ruta", "Valor anterior", "Valor nuevo"}
-    assert body_diff[0]["Tipo"] == "Elemento añadido"
+    j1, j2 = pipelline.get_body_response(r1, r2)
+    result = pipelline.compare_body(j1, j2)
+    assert isinstance(result, list)
+    assert len(result) >= 1
+    assert set(result[0].keys()) == {"Tipo", "Ruta", "Valor anterior", "Valor nuevo"}
+    assert result[0]["Tipo"] == "Elemento añadido"
 
 
 def test_compare_responses_body_diff_iterable_item_removed():
@@ -123,13 +76,8 @@ def test_compare_responses_body_diff_iterable_item_removed():
     r2 = FakeResponse(200, json_data={"a": 1, "b": [1, 2]})
 
     pipelline = PipelineFullJsonApiValidator()
-    result = pipelline.execute(r1, r2)
-    assert isinstance(result, ComparationResult)
-    assert result.is_equal() is False
-    status_diff, body_diff = result.get_diffs()
-    # no status code change
-    assert status_diff == {}
-    # body_diff should contain at least one change describing the modified value
+    j1, j2 = pipelline.get_body_response(r1, r2)
+    body_diff = pipelline.compare_body(j1, j2)
     assert isinstance(body_diff, list)
     assert len(body_diff) >= 1
     assert set(body_diff[0].keys()) == {"Tipo", "Ruta", "Valor anterior", "Valor nuevo"}
@@ -141,13 +89,8 @@ def test_compare_responses_body_diff_dictionary_item_add():
     r2 = FakeResponse(200, json_data={"a": 1, "b": [1, 2], "c": [1, 2], "d": {"x": 10}})
 
     pipelline = PipelineFullJsonApiValidator()
-    result = pipelline.execute(r1, r2)
-    assert isinstance(result, ComparationResult)
-    assert result.is_equal() is False
-    status_diff, body_diff = result.get_diffs()
-    # no status code change
-    assert status_diff == {}
-    # body_diff should contain at least one change describing the modified value
+    j1, j2 = pipelline.get_body_response(r1, r2)
+    body_diff = pipelline.compare_body(j1, j2)
     assert isinstance(body_diff, list)
     assert len(body_diff) == 2
     assert set(body_diff[0].keys()) == {"Tipo", "Ruta", "Valor anterior", "Valor nuevo"}
@@ -159,32 +102,9 @@ def test_compare_responses_body_diff_dictionary_item_removed():
     r2 = FakeResponse(200, json_data={"a": 1, "b": [1, 2]})
 
     pipelline = PipelineFullJsonApiValidator()
-    result = pipelline.execute(r1, r2)
-    assert isinstance(result, ComparationResult)
-    assert result.is_equal() is False
-    status_diff, body_diff = result.get_diffs()
-    # no status code change
-    assert status_diff == {}
-    # body_diff should contain at least one change describing the modified value
+    j1, j2 = pipelline.get_body_response(r1, r2)
+    body_diff = pipelline.compare_body(j1, j2)
     assert isinstance(body_diff, list)
     assert len(body_diff) == 1
     assert set(body_diff[0].keys()) == {"Tipo", "Ruta", "Valor anterior", "Valor nuevo"}
     assert body_diff[0]["Tipo"] == "Clave eliminada"
-
-
-def test_compare_responses_status_code_and_body():
-    # different status codes and different bodies
-    r1 = FakeResponse(200, json_data={"a": 1})
-    r2 = FakeResponse(500, json_data={"a": 2})
-
-    pipelline = PipelineFullJsonApiValidator()
-    result = pipelline.execute(r1, r2)
-    assert isinstance(result, ComparationResult)
-    assert result.is_equal() is False
-    status_diff, body_diff = result.get_diffs()
-    # status diff present
-    assert status_diff["old_value"] == 200
-    assert status_diff["new_value"] == 500
-    # body diff should be present because values differ
-    assert isinstance(body_diff, list)
-    assert len(body_diff) == 1

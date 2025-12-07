@@ -5,7 +5,7 @@ from api_signature_tester.etl.etl_source_data import (
     ETLProccess,
     TestData,
 )
-from api_signature_tester.validator.test_endpoint import EndpointData
+from api_signature_tester.validator.validator_model import EndpointData
 
 
 class LoaderCsv(ETLProccess):

@@ -26,10 +26,10 @@ http://api.test/v1,GET"""
 
 def test_load_data_success(temp_csv):
     # Given
-    loader = LoaderCsv(temp_csv)
+    loader = LoaderCsv()
 
     # When
-    result = loader.load_data()
+    result = loader.load_data(temp_csv)
 
     # Then
     assert isinstance(result, ETLDataProcess)
@@ -62,20 +62,20 @@ def test_load_data_success(temp_csv):
 def test_load_data_file_not_found():
     pass
     # Given
-    loader = LoaderCsv("csv_no_exist.csv")
+    loader = LoaderCsv()
 
     # When/Then
     with pytest.raises(FileNotFoundError):
-        loader.load_data()
+        loader.load_data("csv_no_exist.csv")
 
 
 def test_load_data_invalid_format(temp_csv_invalid):
     pass
     # Given
-    loader = LoaderCsv(temp_csv_invalid)
+    loader = LoaderCsv()
 
     # When
-    result = loader.load_data()
+    result = loader.load_data(temp_csv_invalid)
 
     # Then
     assert isinstance(result, ETLDataProcess)
@@ -91,10 +91,10 @@ def test_empty_csv(tmp_path):
     csv_file.write_text(
         "url_source,method_source,params_source,headers_source,url_new,method_new,params_new,headers_new"
     )
-    loader = LoaderCsv(str(csv_file))
+    loader = LoaderCsv()
 
     # When
-    result = loader.load_data()
+    result = loader.load_data(str(csv_file))
 
     # Then
     assert isinstance(result, ETLDataProcess)
